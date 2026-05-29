@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>陈静 · 19</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap');
+  /* Use system fonts — no external dependency, works everywhere including China */
 
   * { margin:0; padding:0; box-sizing:border-box; }
 
   body {
     background: #000;
     color: #c8b080;
-    font-family: 'Noto Serif SC', 'Cormorant Garamond', serif;
+    font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Serif SC', serif;
     min-height: 100vh; min-height: 100dvh;
     overflow-x: hidden;
     -webkit-tap-highlight-color: transparent;
@@ -34,7 +34,7 @@
   }
   .splash.hide { opacity:0; visibility:hidden; pointer-events:none; }
   .splash-text {
-    font-family:'Noto Serif SC',serif;
+    font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',serif;
     font-size:clamp(1rem, 3vw, 1.3rem);
     font-weight:300; letter-spacing:6px;
     color:rgba(200,160,80,0.7);
@@ -86,7 +86,7 @@
     animation:fadeUp 1.8s ease-out;
   }
   .age {
-    font-family:'Cormorant Garamond','Noto Serif SC',serif;
+    font-family:'Georgia','PingFang SC','Hiragino Sans GB',serif;
     font-size:clamp(2.8rem, 9vw, 5.5rem);
     font-weight:300; font-style:italic;
     color:rgba(200,160,80,0.5);
@@ -124,7 +124,7 @@
     border:1px solid rgba(200,150,80,0.3);
     border-radius:30px;
     color:rgba(220,180,120,0.8);
-    font-family:'Noto Serif SC',serif;
+    font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',serif;
     font-size:0.85rem; letter-spacing:3px;
     cursor:pointer;
     transition:all .4s;
@@ -231,7 +231,7 @@
   }
   .cake-text {
     color:rgba(220,180,120,0.7);
-    font-family:'Noto Serif SC',serif;
+    font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',serif;
     font-size:0.8rem; letter-spacing:4px;
     margin-top:20px;
   }
@@ -262,7 +262,7 @@
   .toast {
     position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
     z-index:40; pointer-events:none;
-    font-family:'Noto Serif SC',serif;
+    font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',serif;
     font-size:clamp(1.1rem, 3.5vw, 1.8rem);
     font-weight:600; letter-spacing:4px;
     color:#d4af6e; white-space:nowrap;
