@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>陈静 · 19</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap');
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: #000;
+    color: #c8b080;
+    font-family: 'Noto Serif SC', 'Cormorant Garamond', serif;
+    min-height: 100vh; min-height: 100dvh;
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none; -webkit-user-select: none;
+    overflow-y: auto;
+  }
+
+  canvas#bgCanvas { position:fixed; inset:0; z-index:0; pointer-events:none; }
+  canvas#confettiCanvas { position:fixed; inset:0; z-index:10; pointer-events:none; }
+
+  /* ── Splash screen ── */
+  .splash {
+    position:fixed; inset:0; z-index:100;
+    background:#000;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    cursor:pointer;
+    transition:opacity 0.8s, visibility 0.8s;
+  }
+  .splash.hide { opacity:0; visibility:hidden; pointer-events:none; }
+  .splash-text {
+    font-family:'Noto Serif SC',serif;
+    font-size:clamp(1rem, 3vw, 1.3rem);
+    font-weight:300; letter-spacing:6px;
+    color:rgba(200,160,80,0.7);
+    animation:splashPulse 2s ease-in-out infinite;
+  }
+  .splash-icon { font-size:clamp(2rem, 6vw, 3rem); margin-bottom:16px; animation:splashPulse 2s ease-in-out infinite .3s; }
+  @keyframes splashPulse {
+    0%,100%{opacity:0.5}
+    50%{opacity:1}
+  }
+
+  /* ── Sound toggle ── */
+  .sound-toggle {
+    position:fixed; top:16px; right:16px; z-index:50;
+    width:36px; height:36px; border-radius:50%;
+    background:rgba(255,255,255,0.06); border:1px solid rgba(200,160,80,0.2);
+    color:rgba(200,160,80,0.6); font-size:0.9rem; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:all .3s;
+  }
+  .sound-toggle:hover { background:rgba(255,255,255,0.1); }
+
+  /* ── Main ── */
+  .main {
+    position:relative; z-index:2;
+    min-height:100vh; min-height:100dvh;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    padding:40px 24px; text-align:center;
+  }
+
+  .glow {
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    width:320px; height:320px;
+    background:radial-gradient(circle, rgba(200,150,80,0.07) 0%, transparent 70%);
+    border-radius:50%; pointer-events:none;
+    animation:glowPulse 3s ease-in-out infinite;
+  }
+  @keyframes glowPulse {
+    0%,100%{opacity:0.5;transform:translate(-50%,-50%) scale(1)}
+    50%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}
+  }
+
+  .name {
+    font-size:clamp(2.6rem, 8vw, 5rem);
+    font-weight:600; letter-spacing:6px;
+    color:#d4af6e;
+    text-shadow:0 0 60px rgba(200,160,80,0.25),0 0 120px rgba(200,160,80,0.1);
+    animation:fadeUp 1.8s ease-out;
+  }
+  .age {
+    font-family:'Cormorant Garamond','Noto Serif SC',serif;
+    font-size:clamp(2.8rem, 9vw, 5.5rem);
+    font-weight:300; font-style:italic;
+    color:rgba(200,160,80,0.5);
+    letter-spacing:2px; line-height:0.8;
+    animation:fadeUp 1.8s ease-out .25s both;
+  }
+  .divider {
+    width:50px; height:1px;
+    background:linear-gradient(90deg,transparent,rgba(200,160,80,0.35),transparent);
+    margin:24px auto;
+    animation:fadeUp 1.8s ease-out .4s both;
+  }
+  .message {
+    font-size:clamp(0.8rem, 2.2vw, 1rem);
+    font-weight:300; letter-spacing:3px;
+    color:rgba(200,160,80,0.4); line-height:2.2;
+    animation:fadeUp 1.8s ease-out .55s both;
+  }
+  .message .hl { color:rgba(220,180,110,0.7); font-weight:400; }
+
+  @keyframes fadeUp {
+    0%{opacity:0;transform:translateY(20px)}
+    100%{opacity:1;transform:translateY(0)}
+  }
+
+  /* ── Button ── */
+  .btn-wrap {
+    margin-top:36px;
+    animation:fadeUp 1.8s ease-out .7s both;
+  }
+  .btn-gift {
+    position:relative;
+    padding:14px 40px;
+    background:rgba(200,140,60,0.08);
+    border:1px solid rgba(200,150,80,0.3);
+    border-radius:30px;
+    color:rgba(220,180,120,0.8);
+    font-family:'Noto Serif SC',serif;
+    font-size:0.85rem; letter-spacing:3px;
+    cursor:pointer;
+    transition:all .4s;
+    overflow:hidden;
+  }
+  .btn-gift:hover {
+    background:rgba(200,140,60,0.15);
+    border-color:rgba(200,150,80,0.5);
+    box-shadow:0 0 30px rgba(200,150,80,0.12);
+  }
+  .btn-gift::after {
+    content:''; position:absolute;
+    top:-50%; left:-50%; width:200%; height:200%;
+    background:radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 60%);
+    opacity:0; transition:opacity .4s;
+  }
+  .btn-gift:hover::after { opacity:1; }
+  .btn-gift .sparkle {
+    position:absolute; width:3px; height:3px;
+    background:#e8c070; border-radius:50%;
+    animation:btnSpark 2s ease-in-out infinite;
+  }
+  @keyframes btnSpark {
+    0%,100%{opacity:0;transform:translateY(0)}
+    50%{opacity:1;transform:translateY(-8px)}
+  }
+
+  /* ── Overlay ── */
+  .overlay {
+    position:fixed; inset:0; z-index:30;
+    background:rgba(0,0,0,0.85);
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    opacity:0; pointer-events:none;
+    transition:opacity .6s;
+  }
+  .overlay.show { opacity:1; pointer-events:auto; }
+  .overlay-close {
+    position:absolute; top:20px; right:20px;
+    width:36px; height:36px; border-radius:50%;
+    background:rgba(255,255,255,0.05); border:1px solid rgba(200,160,80,0.2);
+    color:rgba(200,160,80,0.5); font-size:1.2rem; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  /* ── CSS Cake ── */
+  .cake {
+    position:relative; margin-bottom:24px;
+    animation:cakePop 0.8s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes cakePop {
+    0%{opacity:0;transform:scale(0) rotate(-10deg)}
+    100%{opacity:1;transform:scale(1) rotate(0)}
+  }
+  .cake-plate {
+    width:160px; height:8px;
+    background:radial-gradient(ellipse at center, rgba(180,140,100,0.4), transparent);
+    border-radius:50%; margin:0 auto;
+  }
+  .cake-base {
+    width:120px; height:40px; margin:0 auto;
+    background:linear-gradient(180deg,
+      #e8a0a8 0%, #d4808c 20%, #c86878 40%,
+      #e8c8a0 40%, #d4a870 70%, #b87848 100%);
+    border-radius:6px 6px 0 0;
+    position:relative;
+    box-shadow:0 4px 20px rgba(200,100,120,0.25);
+  }
+  .cake-frosting {
+    width:134px; height:22px; margin:0 auto -6px;
+    background:linear-gradient(180deg, #fff5f5 0%, #ffe0e8 30%, #f8d0d8 60%, #f0c0c8 100%);
+    border-radius:6px 6px 14px 14px;
+    position:relative; z-index:1;
+    box-shadow:0 2px 10px rgba(180,80,100,0.2);
+  }
+  .cake-cream-drip {
+    position:absolute; bottom:-7px; left:8px;
+    width:14px; height:9px;
+    background:#f8d0d8; border-radius:0 0 7px 7px;
+  }
+  .cake-cream-drip:nth-child(2) { left:32px; width:10px; }
+  .cake-cream-drip:nth-child(3) { left:90px; width:12px; }
+  .cake-cream-drip:nth-child(4) { left:108px; width:9px; }
+  .cake-candle {
+    position:absolute; top:-32px; left:50%; transform:translateX(-50%);
+    display:flex; flex-direction:column; align-items:center;
+  }
+  .cake-candle .stick {
+    width:3px; height:26px;
+    background:linear-gradient(to bottom, #f0e0d0, #e0c898);
+    border-radius:1px;
+  }
+  .cake-candle .flame {
+    width:10px; height:14px;
+    background:radial-gradient(ellipse at center 30%, #fff 0%, #fdb 30%, #f90 60%, transparent 100%);
+    border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;
+    animation:candleFlicker 1.5s ease-in-out infinite;
+  }
+  @keyframes candleFlicker {
+    0%,100%{transform:scale(1,1) translateY(0); opacity:0.9}
+    30%{transform:scale(0.85,1.1) translateY(-1px); opacity:1}
+    60%{transform:scale(1.1,0.9) translateY(1px); opacity:0.7}
+    80%{transform:scale(0.9,1.05) translateY(-1px); opacity:0.85}
+  }
+  .cake-text {
+    color:rgba(220,180,120,0.7);
+    font-family:'Noto Serif SC',serif;
+    font-size:0.8rem; letter-spacing:4px;
+    margin-top:20px;
+  }
+
+  /* ── Bows ── */
+  .bow {
+    position:fixed; pointer-events:none; z-index:5;
+    font-size:clamp(1.5rem, 3vw, 2.2rem);
+    animation:bowFloat 4s ease-in-out infinite;
+    opacity:0.35;
+  }
+  @keyframes bowFloat {
+    0%,100%{transform:translateY(0) rotate(var(--r))}
+    50%{transform:translateY(-12px) rotate(var(--r))}
+  }
+
+  /* ── Confetti particle ── */
+  .confetti {
+    position:fixed; pointer-events:none; z-index:12;
+    animation:confettiFall var(--fall-dur) ease-in forwards;
+  }
+  @keyframes confettiFall {
+    0%{opacity:1; transform:translate(0,0) rotate(0deg) scale(1)}
+    100%{opacity:0; transform:translate(var(--dx),var(--dy)) rotate(var(--rot)) scale(0.3)}
+  }
+
+  /* ── Toast text ── */
+  .toast {
+    position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+    z-index:40; pointer-events:none;
+    font-family:'Noto Serif SC',serif;
+    font-size:clamp(1.1rem, 3.5vw, 1.8rem);
+    font-weight:600; letter-spacing:4px;
+    color:#d4af6e; white-space:nowrap;
+    text-shadow:0 0 40px rgba(200,160,80,0.5);
+    animation:toastIn 3s ease-out forwards;
+    max-width:90vw;
+  }
+  @keyframes toastIn {
+    0%{opacity:0; transform:translate(-50%,-50%) scale(0.7)}
+    15%{opacity:1; transform:translate(-50%,-50%) scale(1.05)}
+    25%{transform:translate(-50%,-50%) scale(1)}
+    80%{opacity:1}
+    100%{opacity:0; transform:translate(-50%,-50%) translateY(-30px)}
+  }
+
+  /* ── Footer ── */
+  .footer {
+    position:absolute; bottom:24px; left:0; right:0; text-align:center;
+    font-size:0.65rem; letter-spacing:3px;
+    color:rgba(200,160,80,0.15);
+    animation:fadeUp 1.8s ease-out 1s both;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+<canvas id="confettiCanvas"></canvas>
+
+<!-- Splash screen — click to enter, BGM starts -->
+<div class="splash" id="splash" onclick="enterSite()">
+  <div class="splash-icon">✨</div>
+  <p class="splash-text">点 击 进 入</p>
+</div>
+
+<!-- Sound toggle -->
+<button class="sound-toggle" id="soundBtn" onclick="toggleSound()">🔊</button>
+
+<!-- Decorative bows -->
+<div class="bow" style="top:8%; left:6%; --r:-8deg; animation-delay:0s;">🎀</div>
+<div class="bow" style="top:14%; right:5%; --r:6deg; animation-delay:-1.2s; font-size:1.8rem;">🎀</div>
+<div class="bow" style="top:75%; left:10%; --r:-5deg; animation-delay:-2.5s; opacity:0.25;">🎀</div>
+<div class="bow" style="top:80%; right:8%; --r:10deg; animation-delay:-3.5s; opacity:0.3; font-size:1.6rem;">🎀</div>
+<div class="bow" style="top:45%; left:3%; --r:-12deg; animation-delay:-1.8s; opacity:0.2;">🎀</div>
+
+<div class="main">
+  <div class="glow"></div>
+
+  <h1 class="name">陈&ensp;静</h1>
+  <div class="age">nineteen</div>
+  <div class="divider"></div>
+  <p class="message">
+    一岁一礼，一寸欢喜<br>
+    愿你岁岁常欢愉，万事皆胜意
+  </p>
+
+  <div class="btn-wrap">
+    <button class="btn-gift" id="giftBtn" onclick="openGift()">
+      ✦ 点 击 拆 开 礼 物 ✦
+      <span class="sparkle" style="top:-4px;left:12px;animation-delay:0s;"></span>
+      <span class="sparkle" style="top:-2px;right:16px;animation-delay:-0.7s;"></span>
+      <span class="sparkle" style="bottom:-2px;left:50%;animation-delay:-1.4s;"></span>
+    </button>
+  </div>
+
+  <p class="footer">HAPPY 19TH BIRTHDAY</p>
+</div>
+
+<!-- Cake overlay -->
+<div class="overlay" id="overlay" onclick="event.target===this && closeOverlay()">
+  <button class="overlay-close" onclick="closeOverlay()">✕</button>
+  <div class="cake" id="cakeEl">
+    <div class="cake-candle">
+      <div class="flame"></div>
+      <div class="stick"></div>
+    </div>
+    <div class="cake-frosting">
+      <div class="cake-cream-drip"></div>
+      <div class="cake-cream-drip"></div>
+      <div class="cake-cream-drip"></div>
+      <div class="cake-cream-drip"></div>
+    </div>
+    <div class="cake-base"></div>
+    <div class="cake-plate"></div>
+  </div>
+  <p class="cake-text">生 日 快 乐</p>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+//  BGM — Web Audio API upbeat melody
+// ═══════════════════════════════════════
+let audioCtx = null;
+let isPlaying = false;
+
+function initAudio() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+}
+
+function playNote(freq, startTime, duration, vol) {
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'sine';
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0, startTime);
+  gain.gain.linearRampToValueAtTime(vol, startTime + 0.08);
+  gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start(startTime);
+  osc.stop(startTime + duration);
+}
+
+function playChord(notes, startTime, duration, vol) {
+  for (const n of notes) playNote(n, startTime, duration, vol);
+}
+
+// Upbeat cheerful melody in C major
+const melody = [
+  { n: [261.6, 329.6, 392.0], t: 0,    d: 1.6 },
+  { n: [293.7, 349.2, 440.0], t: 1.6,  d: 1.4 },
+  { n: [329.6, 392.0, 523.2], t: 3.0,  d: 1.8 },
+  { n: [261.6, 329.6, 392.0], t: 4.8,  d: 1.6 },
+  { n: [220.0, 293.7, 349.2], t: 6.4,  d: 1.4 },
+  { n: [246.9, 329.6, 392.0], t: 7.8,  d: 1.6 },
+];
+
+const melodyNotes = [
+  { f: 523.2, t: 0.3,  d: 0.35 },
+  { f: 587.3, t: 0.7,  d: 0.3 },
+  { f: 659.3, t: 1.1,  d: 0.5 },
+  { f: 523.2, t: 1.8,  d: 0.35 },
+  { f: 440.0, t: 2.3,  d: 0.4 },
+  { f: 392.0, t: 2.8,  d: 0.5 },
+  { f: 440.0, t: 3.3,  d: 0.3 },
+  { f: 523.2, t: 3.7,  d: 0.6 },
+  { f: 392.0, t: 4.5,  d: 0.35 },
+  { f: 329.6, t: 5.0,  d: 0.5 },
+  { f: 349.2, t: 5.6,  d: 0.3 },
+  { f: 392.0, t: 6.0,  d: 0.5 },
+  { f: 440.0, t: 6.6,  d: 0.4 },
+  { f: 392.0, t: 7.1,  d: 0.35 },
+  { f: 329.6, t: 7.6,  d: 0.5 },
+  { f: 261.6, t: 8.2,  d: 0.8 },
+];
+
+let melodyTimer = null;
+const LOOP_LENGTH = 9;
+
+function playMelodySegment() {
+  if (!isPlaying || !audioCtx) return;
+  const now = audioCtx.currentTime;
+
+  for (const c of melody) playChord(c.n, now + c.t, c.d, 0.04);
+  for (const n of melodyNotes) {
+    playNote(n.f, now + n.t, n.d, 0.06);
+    playNote(n.f / 2, now + n.t + 0.02, n.d, 0.025);
+  }
+
+  melodyTimer = setTimeout(function() { playMelodySegment(); }, LOOP_LENGTH * 1000 - 200);
+}
+
+function startBGM() {
+  initAudio();
+  if (isPlaying) return;
+  isPlaying = true;
+  document.getElementById('soundBtn').textContent = '🔊';
+  playMelodySegment();
+}
+
+function stopBGM() {
+  isPlaying = false;
+  document.getElementById('soundBtn').textContent = '🔇';
+  if (melodyTimer) clearTimeout(melodyTimer);
+}
+
+function toggleSound() {
+  if (isPlaying) { stopBGM(); }
+  else { startBGM(); }
+}
+
+// ── Splash: click to enter, starts BGM immediately ──
+function enterSite() {
+  startBGM();
+  document.getElementById('splash').classList.add('hide');
+}
+
+// ═══════════════════════════════════════
+//  Background particles
+// ═══════════════════════════════════════
+var bgCanvas = document.getElementById('bgCanvas');
+var bgCtx = bgCanvas.getContext('2d');
+var W, H;
+var bgParticles = [];
+
+function bgResize() {
+  W = bgCanvas.width = window.innerWidth;
+  H = bgCanvas.height = window.innerHeight;
+}
+bgResize();
+window.addEventListener('resize', bgResize);
+
+function BgParticle(initY) {
+  this.x = Math.random() * W;
+  this.y = initY != null ? initY : Math.random() * H;
+  this.r = Math.random() * 1.8 + 0.3;
+  this.speed = Math.random() * 0.25 + 0.06;
+  this.opacity = Math.random() * 0.45 + 0.04;
+  this.wobble = Math.random() * Math.PI * 2;
+  this.wSpeed = (Math.random() - 0.5) * 0.008;
+  this.hue = 38 + Math.random() * 15;
+}
+
+BgParticle.prototype.update = function() {
+  this.y -= this.speed;
+  this.wobble += this.wSpeed;
+  this.x += Math.sin(this.wobble) * 0.15;
+  if (this.y < -10) { this.y = H + 10; this.x = Math.random() * W; }
+};
+
+BgParticle.prototype.draw = function() {
+  bgCtx.beginPath();
+  bgCtx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+  bgCtx.fillStyle = 'hsla(' + this.hue + ',55%,75%,' + this.opacity + ')';
+  bgCtx.fill();
+  if (this.r > 1.2) {
+    bgCtx.beginPath();
+    bgCtx.arc(this.x, this.y, this.r * 2.5, 0, Math.PI * 2);
+    bgCtx.fillStyle = 'hsla(' + this.hue + ',50%,70%,' + (this.opacity * 0.12) + ')';
+    bgCtx.fill();
+  }
+};
+
+var bgCount = Math.min(100, Math.floor(W * 0.16));
+for (var i = 0; i < bgCount; i++) {
+  bgParticles.push(new BgParticle(Math.random() * H));
+}
+
+function bgAnimate() {
+  bgCtx.clearRect(0, 0, W, H);
+  for (var i = 0; i < bgParticles.length; i++) { bgParticles[i].update(); bgParticles[i].draw(); }
+  requestAnimationFrame(bgAnimate);
+}
+bgAnimate();
+
+// ═══════════════════════════════════════
+//  Spectacular particle system
+// ═══════════════════════════════════════
+var cfCanvas = document.getElementById('confettiCanvas');
+var cfCtx = cfCanvas.getContext('2d');
+var particles = [];
+
+var PARTICLE_COLORS = [
+  '#f0d080','#e8c060','#f5d8a0',
+  '#f0c0c8','#e8a8b8','#f8d0d8',
+  '#e0c8f0','#d4b0e8','#ecd8f8',
+  '#ffe8d0','#fdd8b8','#ffe0c0',
+  '#ffffff','#fefefe','#fafafa',
+  '#ffd0d0','#ffb8c0','#ffc8d0',
+];
+
+var HEART_PATH = new Path2D('M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z');
+
+function SparkParticle(x, y, type) {
+  this.x = x; this.y = y;
+  type = type || 'burst';
+  var angle = Math.random() * Math.PI * 2;
+
+  if (type === 'burst') {
+    var speed = Math.random() * 8 + 3;
+    this.vx = Math.cos(angle) * speed;
+    this.vy = Math.sin(angle) * speed;
+    this.gravity = 0.06;
+    this.friction = 0.985;
+    this.life = 1;
+    this.decay = Math.random() * 0.006 + 0.003;
+    this.size = Math.random() * 5 + 2;
+  } else if (type === 'drift') {
+    this.vx = (Math.random() - 0.5) * 1.5;
+    this.vy = -(Math.random() * 1.5 + 0.5);
+    this.gravity = -0.01;
+    this.friction = 0.998;
+    this.life = 1;
+    this.decay = Math.random() * 0.002 + 0.001;
+    this.size = Math.random() * 3 + 1.5;
+  } else if (type === 'heart') {
+    var speed = Math.random() * 3 + 1;
+    this.vx = Math.cos(angle) * speed;
+    this.vy = -(Math.random() * 4 + 2);
+    this.gravity = 0.03;
+    this.friction = 0.993;
+    this.life = 1;
+    this.decay = Math.random() * 0.003 + 0.0015;
+    this.size = Math.random() * 8 + 5;
+  } else if (type === 'spark') {
+    var speed = Math.random() * 12 + 5;
+    this.vx = Math.cos(angle) * speed;
+    this.vy = Math.sin(angle) * speed;
+    this.gravity = 0.04;
+    this.friction = 0.97;
+    this.life = 1;
+    this.decay = Math.random() * 0.04 + 0.02;
+    this.size = Math.random() * 2 + 0.8;
+  }
+
+  this.rotation = Math.random() * 360;
+  this.rSpeed = (Math.random() - 0.5) * 6;
+  this.type = type;
+  this.drawHeart = type === 'heart';
+  this.color = PARTICLE_COLORS[Math.floor(Math.random() * PARTICLE_COLORS.length)];
+  this.glowColor = this.color;
+}
+
+SparkParticle.prototype.update = function() {
+  this.vy += this.gravity;
+  this.vx *= this.friction;
+  this.vy *= this.friction;
+  this.x += this.vx;
+  this.y += this.vy;
+  this.rotation += this.rSpeed;
+  this.life -= this.decay;
+  if (this.life < 0.3) this.life -= this.decay * 1.5;
+};
+
+SparkParticle.prototype.draw = function() {
+  if (this.life <= 0) return;
+  cfCtx.save();
+  cfCtx.translate(this.x, this.y);
+  cfCtx.globalAlpha = Math.max(0, this.life);
+
+  if (this.drawHeart) {
+    cfCtx.fillStyle = this.color;
+    cfCtx.scale(this.size / 24, this.size / 24);
+    cfCtx.fill(HEART_PATH);
+    cfCtx.shadowColor = this.glowColor;
+    cfCtx.shadowBlur = this.size * 2;
+    cfCtx.fill(HEART_PATH);
+  } else {
+    cfCtx.rotate(this.rotation * Math.PI / 180);
+    cfCtx.beginPath();
+    cfCtx.arc(0, 0, this.size * 2.5, 0, Math.PI * 2);
+    cfCtx.fillStyle = this.glowColor + '18';
+    cfCtx.fill();
+    cfCtx.beginPath();
+    cfCtx.arc(0, 0, this.size, 0, Math.PI * 2);
+    cfCtx.fillStyle = this.color;
+    cfCtx.fill();
+    cfCtx.beginPath();
+    cfCtx.arc(0, 0, this.size * 0.4, 0, Math.PI * 2);
+    cfCtx.fillStyle = '#fff';
+    cfCtx.globalAlpha = Math.max(0, this.life * 0.7);
+    cfCtx.fill();
+  }
+  cfCtx.restore();
+};
+
+function megaBurst(x, y) {
+  for (var i = 0; i < 120; i++) particles.push(new SparkParticle(x, y, 'spark'));
+  for (var i = 0; i < 180; i++) particles.push(new SparkParticle(x, y, 'burst'));
+  for (var i = 0; i < 60; i++) particles.push(new SparkParticle(x, y, 'drift'));
+  for (var i = 0; i < 30; i++) particles.push(new SparkParticle(x, y, 'heart'));
+}
+
+function sideBurst(x, y) {
+  for (var i = 0; i < 60; i++) particles.push(new SparkParticle(x, y, 'burst'));
+  for (var i = 0; i < 20; i++) particles.push(new SparkParticle(x, y, 'heart'));
+  for (var i = 0; i < 15; i++) particles.push(new SparkParticle(x, y, 'drift'));
+}
+
+function pAnimate() {
+  cfCtx.clearRect(0, 0, W, H);
+  for (var i = particles.length - 1; i >= 0; i--) {
+    particles[i].update();
+    particles[i].draw();
+    if (particles[i].life <= 0) particles.splice(i, 1);
+  }
+  requestAnimationFrame(pAnimate);
+}
+pAnimate();
+
+// ═══════════════════════════════════════
+//  DOM confetti emoji burst
+// ═══════════════════════════════════════
+var EMOJI_SHAPES = ['❤️','💕','💗','💖','✨','🌟','💫','🎀','💝','💎','🕊️','🌸','🌺','🎂','🧁','🍬','💛','🤍','🩷','💘'];
+
+function domEmojiBurst(x, y, count) {
+  for (var i = 0; i < count; i++) {
+    var el = document.createElement('div');
+    el.className = 'confetti';
+    var dx = (Math.random() - 0.5) * 500;
+    var dy = -(Math.random() * 400 + 80);
+    var rot = (Math.random() - 0.5) * 900;
+    var dur = 2.5 + Math.random() * 4;
+    el.textContent = EMOJI_SHAPES[Math.floor(Math.random() * EMOJI_SHAPES.length)];
+    el.style.cssText = 'left:' + x + 'px; top:' + y + 'px; font-size:' + (14 + Math.random() * 28) + 'px; --dx:' + dx + 'px; --dy:' + dy + 'px; --rot:' + rot + 'deg; --fall-dur:' + dur + 's;';
+    document.body.appendChild(el);
+    setTimeout(function() { el.remove(); }, dur * 1000 + 500);
+  }
+}
+
+// ═══════════════════════════════════════
+//  Interactive — open gift
+// ═══════════════════════════════════════
+var overlay = document.getElementById('overlay');
+var cakeEl = document.getElementById('cakeEl');
+
+// Dynamic flash keyframe
+var flashStyleEl = document.createElement('style');
+flashStyleEl.textContent = '@keyframes flashOut{0%{opacity:1}100%{opacity:0}}';
+document.head.appendChild(flashStyleEl);
+
+function openGift(e) {
+  initAudio();
+  if (!isPlaying) startBGM();
+
+  var cx = window.innerWidth / 2;
+  var cy = window.innerHeight / 2;
+
+  // Screen flash
+  var flash = document.createElement('div');
+  flash.style.cssText = 'position:fixed; inset:0; z-index:50; pointer-events:none; background:radial-gradient(circle, rgba(255,240,210,0.5) 0%, rgba(255,200,150,0.2) 40%, transparent 70%); animation:flashOut 0.8s ease-out forwards;';
+  document.body.appendChild(flash);
+  setTimeout(function() { flash.remove(); }, 900);
+
+  // Mega particle burst from center
+  megaBurst(cx, cy);
+
+  // Ring of secondary bursts (8 around center)
+  var ringCount = 8;
+  for (var i = 0; i < ringCount; i++) {
+    (function(idx) {
+      var angle = (Math.PI * 2 / ringCount) * idx;
+      var dist = 150;
+      var rx = cx + Math.cos(angle) * dist;
+      var ry = cy + Math.sin(angle) * dist;
+      setTimeout(function() { sideBurst(rx, ry); }, 100 + idx * 60);
+    })(i);
+  }
+
+  // DOM emoji bursts (staggered)
+  domEmojiBurst(cx, cy, 80);
+  setTimeout(function() { domEmojiBurst(cx - 100, cy - 40, 40); }, 200);
+  setTimeout(function() { domEmojiBurst(cx + 100, cy - 40, 40); }, 350);
+  setTimeout(function() { domEmojiBurst(cx, cy - 80, 30); }, 500);
+
+  // Show overlay with cake (slightly delayed for dramatic effect)
+  setTimeout(function() {
+    overlay.classList.add('show');
+    // Re-trigger cake pop animation
+    cakeEl.style.animation = 'none';
+    cakeEl.offsetHeight;
+    cakeEl.style.animation = 'cakePop 0.8s cubic-bezier(.34,1.56,.64,1)';
+
+    // Toast message
+    var toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = '🎂 世界上最漂亮的女人陈静生日快乐 🎂';
+    document.body.appendChild(toast);
+    setTimeout(function() { toast.remove(); }, 2800);
+  }, 600);
+}
+
+function closeOverlay() {
+  overlay.classList.remove('show');
+  // Small farewell burst
+  var cx = window.innerWidth / 2;
+  var cy = window.innerHeight / 2;
+  for (var i = 0; i < 40; i++) particles.push(new SparkParticle(cx, cy, 'spark'));
+  for (var i = 0; i < 30; i++) particles.push(new SparkParticle(cx, cy, 'burst'));
+  domEmojiBurst(cx, cy, 20);
+}
+</script>
+</body>
+</html>
